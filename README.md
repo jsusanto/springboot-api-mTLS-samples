@@ -206,4 +206,55 @@ Enter Export Password:
 Verifying - Enter Export Password:
 </pre>
 
+<h2>Step 4: Create the Truststore</h2>
+<h3>4.1 Import the CA Certificate into a PKCS#12 Truststore:</h3>
+
+<pre>
+  keytool -import -file ca.pem -alias "ca" -keystore truststore.p12 -storetype PKCS12
+</pre>
+
+Output:
+<pre>
+  \springboot-api-mTLS-samples\src\main\resources\keystore>keytool -import -file ca.pem -alias "ca" -keystore truststore.p12 -storetype PKCS12
+Enter keystore password:
+Re-enter new password:
+Owner: CN=Medibank Limited, O=Medibank Limited, ST=Some-State, C=AU
+Issuer: CN=Medibank Limited, O=Medibank Limited, ST=Some-State, C=AU
+Serial number: 98f95708e8c78967a4540ccf88267ca43116255
+Valid from: Mon Oct 21 14:57:23 AEDT 2024 until: Tue Oct 21 14:57:23 AEDT 2025
+Certificate fingerprints:
+         SHA1: F0:76:79:A2:D7:EE:BD:29:BE:FC:51:33:64:D7:8F:4A:8F:49:C9:76
+         SHA256: 3E:C3:E5:F1:FE:CC:52:F7:94:BA:55:44:0B:F1:72:6A:5C:B0:C1:DC:A8:F6:F6:C1:F1:8C:20:81:9F:5C:5A:FB
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions:
+
+#1: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+KeyIdentifier [
+0000: 1C 84 7D DB 50 58 E6 22   14 95 D1 51 43 7C 98 EB  ....PX."...QC...
+0010: EF CD 77 C9                                        ..w.
+]
+]
+
+#2: ObjectId: 2.5.29.19 Criticality=true
+BasicConstraints:[
+  CA:true
+  PathLen: no limit
+]
+
+#3: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 1C 84 7D DB 50 58 E6 22   14 95 D1 51 43 7C 98 EB  ....PX."...QC...
+0010: EF CD 77 C9                                        ..w.
+]
+]
+
+Trust this certificate? [no]:  yes
+Certificate was added to keystore
+</pre>
+
 # Run your project (boot run)
