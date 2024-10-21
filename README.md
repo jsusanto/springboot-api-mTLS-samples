@@ -271,11 +271,144 @@ server.ssl.trust-store-password=password
 server.ssl.trust-store-type=PKCS12
 </pre>
 
-Client application.properties
+# Server Project Controller / Codes
+controller/ServerController.java
 <pre>
-client.ssl.key-store=classpath:cert/client.p12
-client.ssl.key-store-password=[client_keystore_password]
-client.ssl.trust-store=classpath:cert/truststore.p12
-client.ssl.trust-store-password=password
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ServerController {
+
+    @GetMapping("/connect")
+    public String get() {
+        return "Successfully connected!";
+    }
+}
 </pre>
+
+# Client Project Controller / Codes
+configuration/RestClientConfig.java
+<pre>
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.CertificateException;
+
+@Configuration
+public class RestClientConfig {
+
+    private static final String PKCS12_FILE_PATH = "C:\\git-projects\\Example\\springboot-api-mTLS-samples\\client\\src\\main\\resources\\cert\\client.p12";
+    private static final String PKCS12_PASSWORD = "password";
+    private static final String TRUSTSTORE_FILE_PATH = "C:\\git-projects\\Example\\springboot-api-mTLS-samples\\client\\src\\main\\resources\\cert\\truststore.p12";
+    private static final String TRUSTSTORE_PASSWORD = "password";
+
+    @Bean
+    public RestTemplate restTemplate() {
+        SSLContext sslContext = configureSSLContext();
+        return new RestTemplate(createRequestFactory(sslContext));
+    }
+
+    private SSLContext configureSSLContext() {
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            char[] keyStorePassword = PKCS12_PASSWORD.toCharArray();
+            keyStore.load(new FileInputStream(PKCS12_FILE_PATH), keyStorePassword);
+
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, keyStorePassword);
+
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            char[] trustStorePassword = TRUSTSTORE_PASSWORD.toCharArray();
+            trustStore.load(new FileInputStream(TRUSTSTORE_FILE_PATH), trustStorePassword);
+
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+
+            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+
+            return sslContext;
+        } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException |
+                 UnrecoverableKeyException | KeyManagementException e) {
+            throw new RuntimeException("Error configuring SSLContext", e);
+        }
+    }
+
+    private ClientHttpRequestFactory createRequestFactory(SSLContext sslContext) {
+        return new CustomRequestFactory(sslContext);
+    }
+
+    private static class CustomRequestFactory extends SimpleClientHttpRequestFactory {
+
+        private final SSLContext sslContext;
+
+        public CustomRequestFactory(SSLContext sslContext) {
+            this.sslContext = sslContext;
+        }
+
+        @Override
+        protected void prepareConnection(java.net.HttpURLConnection connection, String httpMethod) throws IOException {
+            if (connection instanceof javax.net.ssl.HttpsURLConnection) {
+                ((javax.net.ssl.HttpsURLConnection) connection).setSSLSocketFactory(sslContext.getSocketFactory());
+            }
+            super.prepareConnection(connection, httpMethod);
+        }
+    }
+}
+</pre>
+
+controller/SSLClient.java
+<pre>
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+@RestController
+@RequestMapping("/api")
+public class SSLClient {
+
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    public SSLClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @GetMapping("/send-request")
+    public ResponseEntity<String> sendRequest() {
+        String url = "https://localhost:8443/connect";
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        return response;
+    }
+}
+</pre>
+
 # Run your project (boot run)
+
+<h3>Step 1: Run the Server - Boot Run</h3>
+![image](https://github.com/user-attachments/assets/12561657-1cf5-40d0-84f5-a1bf9ef4cde1)
+
+<h3>Step 2: Run the Client - Boot Run</h3>
+![image](https://github.com/user-attachments/assets/36cdbfe0-a310-4fcb-9708-1c6250e4be08)
+
+<h3>Step 3: Use Postman / Browser and hit http://localhost:8080/api/send-request</h3>
+![image](https://github.com/user-attachments/assets/718f3da4-6782-4e5c-bafb-4756dcf96408)
+
+
+# References
+- https://bohutskyi.com/security-mtls-in-spring-boot-aef44316dd4b
+- https://medium.com/@nazeer.arus18/consuming-a-secure-api-with-mutual-tls-authentication-in-spring-boot-6ad45d7adb92
