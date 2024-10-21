@@ -257,4 +257,25 @@ Trust this certificate? [no]:  yes
 Certificate was added to keystore
 </pre>
 
+<h2>Configuring Springboot for mTLS</h2>
+
+Server application.properties
+<pre>
+server.port=8443
+server.ssl.key-store=classpath:cert/server.p12
+server.ssl.key-store-password=[server_keystore_password]
+server.ssl.key-store-type=PKCS12
+server.ssl.client-auth=NEED
+server.ssl.trust-store=classpath:cert/truststore.p12
+server.ssl.trust-store-password=password
+server.ssl.trust-store-type=PKCS12
+</pre>
+
+Client application.properties
+<pre>
+client.ssl.key-store=classpath:cert/client.p12
+client.ssl.key-store-password=[client_keystore_password]
+client.ssl.trust-store=classpath:cert/truststore.p12
+client.ssl.trust-store-password=password
+</pre>
 # Run your project (boot run)
