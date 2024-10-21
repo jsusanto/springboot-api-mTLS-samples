@@ -20,7 +20,7 @@ public class SSLClient {
 
     @GetMapping("/send-request")
     public ResponseEntity<String> sendRequest() {
-        String url = "https://localhost:8443/";
+        String url = "https://localhost:8443/connect";
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         return response;
     }
