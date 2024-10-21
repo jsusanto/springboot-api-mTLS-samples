@@ -171,8 +171,8 @@ Password: password
 \springboot-restapi\src\main\resources\keystore>keytool -import -file ca.pem -alias "ca" -keystore truststore.p12 -storetype PKCS12
 Enter keystore password:
 Re-enter new password:
-Owner: EMAILADDRESS=jeffry.susanto@medibank.com.au, O=Internet Widgits Pty Ltd, L=Melbourne, ST=VIC, C=AU
-Issuer: EMAILADDRESS=jeffry.susanto@medibank.com.au, O=Internet Widgits Pty Ltd, L=Melbourne, ST=VIC, C=AU
+Owner: EMAILADDRESS=, O=Internet Widgits Pty Ltd, L=Melbourne, ST=VIC, C=AU
+Issuer: EMAILADDRESS=, O=Internet Widgits Pty Ltd, L=Melbourne, ST=VIC, C=AU
 Serial number: 5b1d741ed7b35c30de2431a29da63ec257ec0cfc
 Valid from: Wed Oct 16 17:44:22 AEDT 2024 until: Thu Oct 16 17:44:22 AEDT 2025
 Certificate fingerprints:
